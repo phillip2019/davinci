@@ -550,7 +550,10 @@ public class SqlUtils {
             connection = sourceUtils.getConnection(this.jdbcSourceInfo);
             if (null != connection) {
                 DatabaseMetaData metaData = connection.getMetaData();
-                List<String> primaryKeys = getPrimaryKeys(dbName, tableName, metaData);
+                List<String> primaryKeys = new ArrayList<>();
+                if (!dataTypeEnum.equals(PRESTO)) {
+                    primaryKeys = getPrimaryKeys(dbName, tableName, metaData);
+                }
                 List<QueryColumn> columns = getColumns(dbName, tableName, metaData);
                 tableInfo = new TableInfo(tableName, primaryKeys, columns);
             }
