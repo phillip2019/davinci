@@ -5074,7 +5074,9 @@ function getVariableValue(filter, fields, value) {
             if (value.length) {
                 variable = value
                     .map(function (v, index) {
-                        var name = fields[index].name;
+                        // console.log(v, fields, index);
+                        // var name = fields[index].name;
+                        var name = fields[index];
                         return {name: name, value: "'" + moment(v).format(dateFormat) + "'"};
                     });
             }
