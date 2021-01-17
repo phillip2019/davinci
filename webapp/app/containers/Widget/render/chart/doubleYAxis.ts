@@ -191,9 +191,10 @@ export default function (chartProps: IChartProps, drillOptions) {
       {
         type: 'value',
         key: 'yAxisIndex0',
-        min: 0,
-        max: rightMax > 0 ? rightInterval * (yAxisSplitNumber - 1) : leftInterval * (yAxisSplitNumber - 1),
-        interval: rightInterval,
+        // min: 0,
+        // max: rightMax > 0 ? rightInterval * (yAxisSplitNumber - 1) : leftInterval * (yAxisSplitNumber - 1),
+        // interval: rightInterval,
+        scale: true,
         position: 'right',
         ...getDoubleYAxis(doubleYAxis)
       },
@@ -203,6 +204,7 @@ export default function (chartProps: IChartProps, drillOptions) {
         min: 0,
         max: leftInterval * (yAxisSplitNumber - 1),
         interval: leftInterval,
+        scale: true,
         position: 'left',
         ...getDoubleYAxis(doubleYAxis)
       }
