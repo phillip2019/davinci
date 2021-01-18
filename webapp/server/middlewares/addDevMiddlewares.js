@@ -22,8 +22,9 @@ module.exports = function addDevMiddlewares(app, webpackConfig) {
     webpackConfig.output.publicPath
   )
 
-  let proxyTarget = 'http://localhost:8080/'
+  let proxyTarget = 'http://172.18.5.14:8088/'
   const configFilePath = path.resolve(__dirname, '../config.json')
+  console.log(configFilePath)
 
   if (fs.existsSync(configFilePath)) {
     const jsonConfig = fs.readFileSync(configFilePath)
