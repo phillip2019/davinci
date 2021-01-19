@@ -551,6 +551,7 @@ public class SqlUtils {
             if (null != connection) {
                 DatabaseMetaData metaData = connection.getMetaData();
                 List<String> primaryKeys = new ArrayList<>();
+                // presto不获取主键
                 if (!dataTypeEnum.equals(PRESTO)) {
                     primaryKeys = getPrimaryKeys(dbName, tableName, metaData);
                 }
