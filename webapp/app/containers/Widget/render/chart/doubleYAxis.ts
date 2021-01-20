@@ -146,17 +146,20 @@ export default function (chartProps: IChartProps, drillOptions) {
 
   let leftMax
   let rightMax
+  let rightMin = 0
 
   if (stack) {
     leftMax = metrics.reduce((num, m) => num + Math.max(...data.map((d) => d[`${m.agg}(${decodeMetricName(m.name)})`])), 0)
     rightMax = secondaryMetrics.reduce((num, m) => num + Math.max(...data.map((d) => d[`${m.agg}(${decodeMetricName(m.name)})`])), 0)
+    rightMin = 0
   } else {
     leftMax = Math.max(...metrics.map((m) => Math.max(...data.map((d) => d[`${m.agg}(${decodeMetricName(m.name)})`]))))
     rightMax = Math.max(...secondaryMetrics.map((m) => Math.max(...data.map((d) => d[`${m.agg}(${decodeMetricName(m.name)})`]))))
+    rightMin = Math.min(...secondaryMetrics.map((m) => Math.min(...data.map((d) => d[`${m.agg}(${decodeMetricName(m.name)})`]))))
   }
 
   const leftInterval = getYaxisInterval(leftMax, (yAxisSplitNumber - 1))
-  const rightInterval = rightMax > 0 ? getYaxisInterval(rightMax, (yAxisSplitNumber - 1)) : leftInterval
+  const rightInterval = rightMax > 0 ? getYaxisScaleInterval(rightMax, (yAxisSplitNumber - 1), rightMin) : leftInterval
 
   const inverseOption = xAxis.inverse ? { inverse: true } : null
 
@@ -191,10 +194,10 @@ export default function (chartProps: IChartProps, drillOptions) {
       {
         type: 'value',
         key: 'yAxisIndex0',
-        // min: 0,
-        // max: rightMax > 0 ? rightInterval * (yAxisSplitNumber - 1) : leftInterval * (yAxisSplitNumber - 1),
-        // interval: rightInterval,
-        scale: true,
+        min: rightMin,
+        max: rightMax > 0 ? (rightInterval * (yAxisSplitNumber - 1) + rightMin) : leftInterval * (yAxisSplitNumber - 1),
+        interval: rightInterval,
+        // scale: true,
         position: 'right',
         ...getDoubleYAxis(doubleYAxis)
       },
@@ -254,6 +257,13 @@ export function getAixsMetrics (type, axisMetrics, data, stack, labelOption, ref
 
 export function getYaxisInterval (max, splitNumber) {
   const roughInterval = parseInt(`${max / splitNumber}`, 10)
+  const divisor = Math.pow(10, (`${roughInterval}`.length - 1))
+  return (parseInt(`${roughInterval / divisor}`, 10) + 1) * divisor
+}
+
+export function getYaxisScaleInterval (max, splitNumber, min) {
+  const maxT = max - min
+  const roughInterval = parseInt(`${maxT / splitNumber}`, 10)
   const divisor = Math.pow(10, (`${roughInterval}`.length - 1))
   return (parseInt(`${roughInterval / divisor}`, 10) + 1) * divisor
 }
