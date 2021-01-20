@@ -33,7 +33,8 @@ import {
   makeGrouped,
   getGroupedXaxis,
   getCartesianChartMetrics,
-  getCartesianChartReferenceOptions
+  getCartesianChartReferenceOptions,
+  getAixsMetricDisplayName
 } from './util'
 import { getFormattedValue } from '../../components/Config/Format'
 import ChartTypes from '../../config/chart/ChartTypes'
@@ -144,9 +145,10 @@ export default function (chartProps: IChartProps, drillOptions?: any) {
         seriesData.push(grouped[k])
       })
     } else {
+      // 若存在别名alias, 则以alias优先
       const serieObj = {
         id: m.name,
-        name: m.displayName,
+        name: getAixsMetricDisplayName(m),
         type: 'line',
         sampling: 'average',
         data: data.map((g, index) => {
@@ -201,6 +203,7 @@ export default function (chartProps: IChartProps, drillOptions?: any) {
         ...labelOption,
         ...(i === metrics.length - 1 && referenceOptions)
       }
+
       series.push(serieObj)
       seriesData.push([...data])
     }
@@ -247,7 +250,7 @@ export default function (chartProps: IChartProps, drillOptions?: any) {
     yAxis: getMetricAxisOption(
       yAxis,
       yAxisSplitLineConfig,
-      metrics.map((m) => decodeMetricName(m.name)).join(` / `)
+      metrics.map((m) => decodeMetricName(getAixsMetricDisplayName(m))).join(` / `)
     ),
     series,
     tooltip: {

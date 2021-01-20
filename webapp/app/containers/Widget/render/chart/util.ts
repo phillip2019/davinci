@@ -770,6 +770,13 @@ function getReferenceDataMetricAxis(
   }
 }
 
+export function getAixsMetricDisplayName(m) {
+  if (m.field && m.field.alias) {
+    return m.field.alias;
+  }
+  return m.displayName
+}
+
 function calcAggregateReferenceData(
   valueType: ReferenceValueType,
   metricData: number[]
