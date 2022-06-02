@@ -546,9 +546,7 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <compilerArguments>
-                        <bootclasspath>
-                            ${java.home}/lib/rt.jar${path.separator}${java.home}/lib/javaws.jar${path.separator}${java.home}/lib/jce.jar
-                        </bootclasspath>
+                        <extdirs>${java.home}/jre/lib</extdirs>
                     </compilerArguments>
                 </configuration>
             </plugin>
