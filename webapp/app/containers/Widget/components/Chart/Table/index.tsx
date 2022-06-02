@@ -137,6 +137,8 @@ export class Table extends React.PureComponent<IChartProps, ITableStates> {
     const nextCurrentSorter: ITableStates['currentSorter'] = sorter.field
       ? { column: sorter.field, direction: MapAntSortOrder[sorter.order] }
       : null
+
+    console.log(nextCurrentSorter)
     this.setState({ currentSorter: nextCurrentSorter })
     const { current, pageSize } = pagination
     this.refreshTable(current, pageSize, nextCurrentSorter)
