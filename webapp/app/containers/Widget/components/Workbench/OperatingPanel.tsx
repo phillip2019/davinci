@@ -956,8 +956,9 @@ export class OperatingPanel extends React.Component<
     )
     item.sort = sortConfig
     this.setWidgetProps(dataParams, styleParams)
+    // FixMe: 保存排序状态配置
     this.setState({
-      sortModalVisible: false
+      sortModalVisible: sortConfig.sortType !== FieldSortTypes.Default
     })
   }
 
@@ -1262,7 +1263,7 @@ export class OperatingPanel extends React.Component<
     }
 
     if (options) {
-      if (options.orders) {
+      if (renderType !== 'rerender' && options.orders) {
         requestParams.orders = requestParams.orders.concat(options.orders)
       }
     }
