@@ -28,7 +28,7 @@ const AggregatorDimension: ISettingItem = {
   constrants: [{
     settingType: SettingTypes.Indicator | SettingTypes.Tip,
     itemType: ItemTypes.Value,
-    itemValueType: ItemValueTypes.Date | ItemValueTypes.GeoCity | ItemValueTypes.GeoCountry | ItemValueTypes.GeoProvince | ItemValueTypes.String
+    itemValueType: ItemValueTypes.Date | ItemValueTypes.GeoCity | ItemValueTypes.GeoCountry | ItemValueTypes.GeoProvince | ItemValueTypes.String | ItemValueTypes.Image
   }],
   sub: false,
   items: [{

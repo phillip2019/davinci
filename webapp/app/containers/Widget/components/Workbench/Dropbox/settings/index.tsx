@@ -87,7 +87,8 @@ export const MapItemValueTypes = {
   [ViewModelVisualTypes.GeoCountry]: ItemValueTypes.GeoCountry,
   [ViewModelVisualTypes.GeoProvince]: ItemValueTypes.GeoProvince,
   [ViewModelVisualTypes.Number]: ItemValueTypes.Number,
-  [ViewModelVisualTypes.String]: ItemValueTypes.String
+  [ViewModelVisualTypes.String]: ItemValueTypes.String,
+  [ViewModelVisualTypes.Image]: ItemValueTypes.Image
 }
 
 export default SettingsList

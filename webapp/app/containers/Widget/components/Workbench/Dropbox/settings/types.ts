@@ -19,7 +19,8 @@ export enum ItemValueTypes {
   Date = 1 << 2,
   GeoCountry = 1 << 3,
   GeoProvince = 1 << 4,
-  GeoCity = 1 << 5
+  GeoCity = 1 << 5,
+  Image = 1 << 6,
 }
 
 export interface ISettingItem {
