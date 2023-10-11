@@ -54,7 +54,7 @@ public class SwaggerConfiguration {
 
 
         return new Docket(DocumentationType.SWAGGER_2)
-                .enable(Boolean.FALSE)
+                .enable(false)
                 .globalResponseMessage(RequestMethod.GET, responseMessageList)
                 .globalResponseMessage(RequestMethod.POST, responseMessageList)
                 .globalResponseMessage(RequestMethod.PUT, responseMessageList)
