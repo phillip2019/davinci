@@ -64,11 +64,12 @@ logging:
   config: file:${DAVINCI3_HOME}/config/logback.xml
 
 
-springfox:
-  documentation:
-    swagger:
-      v2:
-        path: /api-doc
+#springfox:
+#  documentation:
+#    swagger:
+#      v2:
+#        path: /api-doc
+#  enable: false
 
 
 pagehelper:
