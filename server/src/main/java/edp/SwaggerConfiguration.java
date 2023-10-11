@@ -54,11 +54,11 @@ public class SwaggerConfiguration {
 
 
         return new Docket(DocumentationType.SWAGGER_2)
+                .enable(Boolean.FALSE)
                 .globalResponseMessage(RequestMethod.GET, responseMessageList)
                 .globalResponseMessage(RequestMethod.POST, responseMessageList)
                 .globalResponseMessage(RequestMethod.PUT, responseMessageList)
                 .globalResponseMessage(RequestMethod.DELETE, responseMessageList)
-
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("edp.davinci.controller"))
