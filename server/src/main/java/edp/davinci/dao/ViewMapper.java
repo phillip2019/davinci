@@ -98,7 +98,7 @@ public interface ViewMapper {
             "	s.`name` 'source.name',",
             "	s.`description` 'source.description',",
             "	s.`config` 'source.config',",
-            "	s.`projSheetWorkerect_id` 'source.projectId',",
+            "	s.`project_id` 'source.projectId',",
             "	s.`type` 'source.type'",
             "FROM `view` v",
             "	LEFT JOIN project p on p.id = v.project_id",
