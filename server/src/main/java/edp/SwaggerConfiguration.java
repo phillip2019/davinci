@@ -40,9 +40,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.ArrayList;
 import java.util.List;
 
-@Profile({"dev","test"})
-@Configuration
-@EnableSwagger2
+//@Profile({"dev","test"})
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfiguration {
     @Bean
     public Docket createRestApi() {
