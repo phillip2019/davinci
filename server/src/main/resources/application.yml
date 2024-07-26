@@ -13,7 +13,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #  >>
-
 davinci:
   version: 0.3-rc
 
@@ -59,17 +58,21 @@ spring:
     caffeine:
       type: caffeine
 
+  profiles:
+    active: prod
+
 
 logging:
   config: file:${DAVINCI3_HOME}/config/logback.xml
 
 
-#springfox:
-#  documentation:
-#    swagger:
-#      v2:
-#        path: /api-doc
-#  enable: false
+springfox:
+  documentation:
+    enable: false
+    swagger:
+      v2:
+        path: /api-doc
+  enable: false
 
 
 pagehelper:

@@ -38,11 +38,6 @@ public class HomeController {
     @Autowired
     private Environment environment;
 
-    @RequestMapping("swagger")
-    public String swagger() {
-        return "redirect:swagger-ui.html";
-    }
-
     @RequestMapping(value = {"", "/"})
     public String index() {
         return "index";

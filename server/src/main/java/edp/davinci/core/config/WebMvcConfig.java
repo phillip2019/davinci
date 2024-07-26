@@ -24,6 +24,7 @@ import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import edp.core.inteceptor.RequestJsonHandlerArgumentResolver;
+import edp.core.utils.TxtResourceResolver;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.inteceptor.AuthenticationInterceptor;
 import edp.davinci.core.inteceptor.CurrentPlatformMethodArgumentResolver;
@@ -38,6 +39,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -140,7 +142,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
                 .addResourceLocations("classpath:/static/page/")
                 .addResourceLocations("classpath:/static/templates/")
                 .addResourceLocations("file:" + webResources)
-                .addResourceLocations("file:" + filePath);
+                .addResourceLocations("file:" + filePath)
+                .resourceChain(true)
+                .addResolver(new TxtResourceResolver(new PathResourceResolver()))
+        ;
 
     }
 

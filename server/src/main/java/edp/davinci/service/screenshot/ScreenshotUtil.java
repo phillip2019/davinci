@@ -238,6 +238,7 @@ public class ScreenshotUtil {
         options.addArguments("disable-application-cache");
         options.addArguments("disable-web-security");
         options.addArguments("no-proxy-server");
+        options.addArguments("no-zygote");
 
         return new ChromeDriver(options);
     }
