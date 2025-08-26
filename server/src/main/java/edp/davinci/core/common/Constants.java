@@ -131,7 +131,7 @@ public class Constants extends Consts {
     public static final String STAR_TARGET_PROJECT = "project";
 
 
-    public static final String REG_USER_PASSWORD = ".{6,20}";
+    public static final String REG_USER_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{12,30}$";
 
     public static final String REG_SQL_PLACEHOLDER = "%s.+%s";
 
