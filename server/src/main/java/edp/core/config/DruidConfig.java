@@ -108,9 +108,10 @@ public class DruidConfig {
     public ServletRegistrationBean druidServlet() {
         ServletRegistrationBean reg = new ServletRegistrationBean();
         reg.setServlet(new StatViewServlet());
-        reg.addUrlMappings("/druid/*");
-        reg.addInitParameter("loginUsername", "root");
-        reg.addInitParameter("loginPassword", "123456");
+        reg.addUrlMappings("/druid2025/*");
+        reg.addInitParameter("loginUsername", "chinagoods");
+        reg.addInitParameter("loginPassword", "c%K3-xvnY!Ep=].:RhGsj@RM,1kawx");
+        reg.addInitParameter("resetEnable", "false");
         return reg;
     }
 
