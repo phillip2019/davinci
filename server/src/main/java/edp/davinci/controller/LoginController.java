@@ -20,6 +20,7 @@
 package edp.davinci.controller;
 
 import edp.core.annotation.AuthIgnore;
+import edp.core.utils.RedisUtils;
 import edp.core.utils.TokenUtils;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.common.ResultMap;
@@ -33,6 +34,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +53,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Api(tags = "login", basePath = Constants.BASE_API_PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -73,6 +77,15 @@ public class LoginController {
 
     @Autowired(required = false)
     private ClientRegistrationRepository clientRegistrationRepository;
+    
+    @Autowired(required = false)
+    private RedisUtils redisUtils;
+    
+    @Value("${login.maxAttempts:3}")
+    private int maxAttempts;
+    
+    @Value("${login.lockoutDuration:300}")
+    private int lockoutDuration;
 
     /**
      * 登录
@@ -89,11 +102,41 @@ public class LoginController {
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
         }
 
+        String username = userLogin.getUsername();
+        String lockKey = "login_lock:" + username;
+        String attemptsKey = "login_attempts:" + username;
+        
+        // 检查用户是否被锁定
+        if (redisUtils != null && redisUtils.isRedisEnable()) {
+            Object lock = redisUtils.get(lockKey);
+            if (lock != null && (Boolean) lock) {
+                ResultMap resultMap = new ResultMap().fail().message("账户已被锁定，请5分钟后再试");
+                return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+            }
+            
+            // 检查登录失败次数
+            Object attemptsObj = redisUtils.get(attemptsKey);
+            int attempts = attemptsObj == null ? 0 : ((Long) attemptsObj).intValue();
+            if (attempts >= maxAttempts) {
+                // 锁定账户5分钟
+                redisUtils.set(lockKey, true, (long) lockoutDuration, TimeUnit.SECONDS);
+                redisUtils.delete(attemptsKey);
+                ResultMap resultMap = new ResultMap().fail().message("账户已被锁定，请5分钟后再试");
+                return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+            }
+        }
+
         User user = userService.userLogin(userLogin);
         if (!user.getActive()) {
             log.info("this user is not active： {}", userLogin.getUsername());
             ResultMap resultMap = new ResultMap(tokenUtils).failWithToken(tokenUtils.generateToken(user)).message("this user is not active");
             return ResponseEntity.status(resultMap.getCode()).body(resultMap);
+        }
+
+        // 登录成功，清除失败次数
+        if (redisUtils != null && redisUtils.isRedisEnable()) {
+            redisUtils.delete(attemptsKey);
+            redisUtils.delete(lockKey);
         }
 
         UserLoginResult userLoginResult = new UserLoginResult(user);
@@ -129,7 +172,7 @@ public class LoginController {
     @AuthIgnore
     @PostMapping(value = "externalLogin", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity externalLogin(Principal principal) {
-        if (null != principal && principal instanceof OAuth2AuthenticationToken) {
+        if (principal instanceof OAuth2AuthenticationToken) {
             User user = userService.externalRegist((OAuth2AuthenticationToken) principal);
             String token = tokenUtils.generateToken(user);
             userService.activateUserNoLogin(token, null);

@@ -51,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -60,8 +61,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static edp.core.consts.Consts.*;
 
 @Slf4j
 @Service("userService")
@@ -81,8 +85,16 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
 
     @Autowired
     private MailUtils mailUtils;
-
-
+    
+    @Autowired(required = false)
+    private RedisUtils redisUtils;
+    
+    @Value("${login.maxAttempts:3}")
+    private int maxAttempts;
+    
+    @Value("${login.lockoutDuration:300}")
+    private int lockoutDuration;
+    
     @Autowired
     private FileUtils fileUtils;
 
@@ -230,6 +242,8 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
 
         String username = userLogin.getUsername();
         String password = userLogin.getPassword();
+        String attemptsKey = "login_attempts:" + username;
+        String lockKey = "login_lock:" + username;
 
         User user = getByUsername(username);
         if (user != null) {
@@ -249,12 +263,42 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
                 return user;
             }
 
+            // 登录失败，增加失败次数
+            if (redisUtils != null && redisUtils.isRedisEnable()) {
+                Object attemptsObj = redisUtils.get(attemptsKey);
+                int attempts = attemptsObj == null ? 0 : ((Long) attemptsObj).intValue();
+                attempts++;
+                
+                if (attempts >= maxAttempts) {
+                    // 锁定账户5分钟
+                    redisUtils.set(lockKey, true, (long) lockoutDuration, TimeUnit.SECONDS);
+                    redisUtils.delete(attemptsKey);
+                } else {
+                    redisUtils.set(attemptsKey, attempts, (long) lockoutDuration, TimeUnit.SECONDS);
+                }
+            }
+
             log.info("username({}) password is wrong", username);
             throw new ServerException("username or password is wrong");
         }
 
         user = ldapAutoRegist(username, password);
         if (user == null) {
+            // 登录失败，增加失败次数
+            if (redisUtils != null && redisUtils.isRedisEnable()) {
+                Object attemptsObj = redisUtils.get(attemptsKey);
+                int attempts = attemptsObj == null ? 0 : ((Long) attemptsObj).intValue();
+                attempts++;
+                
+                if (attempts >= maxAttempts) {
+                    // 锁定账户5分钟
+                    redisUtils.set(lockKey, true, (long) lockoutDuration, TimeUnit.SECONDS);
+                    redisUtils.delete(attemptsKey);
+                } else {
+                    redisUtils.set(attemptsKey, attempts, (long) lockoutDuration, TimeUnit.SECONDS);
+                }
+            }
+            
             throw new ServerException("username or password is wrong");
         }
         return user;
@@ -648,6 +692,11 @@ public class UserServiceImpl extends BaseEntityService implements UserService {
         }
         if (StringUtils.isEmpty(ticket.getPassword())) {
             throw new ServerException("Password cannot be Empty");
+        }
+
+        // 添加强密码校验
+        if (!Pattern.matches(Constants.REG_USER_PASSWORD, ticket.getPassword())) {
+            throw new ServerException("密码必须至少12位，且包含大小写字母、数字和特殊字符");
         }
 
         String uncompress = StringZipUtil.decompress(token);
