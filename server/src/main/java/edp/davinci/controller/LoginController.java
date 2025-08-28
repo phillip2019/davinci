@@ -116,7 +116,7 @@ public class LoginController {
             
             // 检查登录失败次数
             Object attemptsObj = redisUtils.get(attemptsKey);
-            int attempts = attemptsObj == null ? 0 : ((Long) attemptsObj).intValue();
+            int attempts = attemptsObj == null ? 0 : (Integer) attemptsObj;
             if (attempts >= maxAttempts) {
                 // 锁定账户5分钟
                 redisUtils.set(lockKey, true, (long) lockoutDuration, TimeUnit.SECONDS);
