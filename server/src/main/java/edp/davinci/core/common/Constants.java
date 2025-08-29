@@ -133,7 +133,7 @@ public class Constants extends Consts {
     /**
      * 强密码校验规则：必须包含大小写字母、数字、特殊字符，长度至少12位
      */
-    public static final String REG_USER_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{12,}$";
+    public static final String REG_USER_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])[\\w\\W]{12,}$";
 
     public static final String REG_SQL_PLACEHOLDER = "%s.+%s";
 
