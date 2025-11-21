@@ -200,6 +200,7 @@ export default function (chartProps: IChartProps, drillOptions) {
         interval: rightInterval,
         // scale: true,
         position: 'right',
+        name: secondaryMetrics ? secondaryMetrics.map((m) => getAixsMetricDisplayName(m)).join(' / ') : '',
         ...getDoubleYAxis(doubleYAxis)
       },
       {
@@ -210,6 +211,7 @@ export default function (chartProps: IChartProps, drillOptions) {
         interval: leftInterval,
         scale: true,
         position: 'left',
+        name: metrics.map((m) => getAixsMetricDisplayName(m)).join(' / '),
         ...getDoubleYAxis(doubleYAxis)
       }
     ],
