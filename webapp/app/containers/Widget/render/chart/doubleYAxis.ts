@@ -30,7 +30,8 @@ import {
   getLegendOption,
   getGridPositions,
   getDimetionAxisOption,
-  getCartesianChartReferenceOptions
+  getCartesianChartReferenceOptions,
+  getAixsMetricDisplayName
 } from './util'
 import { getFormattedValue } from '../../components/Config/Format'
 import { getFieldAlias } from '../../components/Config/Field'
@@ -238,7 +239,7 @@ export function getAixsMetrics (type, axisMetrics, data, stack, labelOption, ref
     })
 
     seriesAxis.push({
-      name: decodedMetricName,
+      name: getAixsMetricDisplayName(m),
       type: axisPosition && axisPosition.type ? axisPosition.type : type === 'metrics' ? 'line' : 'bar',
       ...stackOption,
       yAxisIndex: type === 'metrics' ? 1 : 0,
