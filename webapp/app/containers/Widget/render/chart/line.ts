@@ -88,9 +88,17 @@ export default function (chartProps: IChartProps, drillOptions?: any) {
 
   metrics.forEach((m, i) => {
     const decodedMetricName = decodeMetricName(m.name)
+    console.log('=== LINE CHART DEBUG ===')
+    console.log('color.items.length:', color.items.length)
+    console.log('m:', m)
+    console.log('m.field:', m.field)
+    console.log('m.displayName:', m.displayName)
+    console.log('========================')
     if (color.items.length) {
       const groupedEntries = Object.entries(grouped)
+      console.log('Using color.items branch, groupedEntries:', groupedEntries)
       groupedEntries.forEach(([k, v]: [string, any[]], gIndex) => {
+        console.log('k (series name):', k)
         const serieObj = {
           id: `${m.name}${DEFAULT_SPLITER}${DEFAULT_SPLITER}${k}`,
           name: `${k}${metrics.length > 1 ? ` ${m.displayName}` : ''}`,
