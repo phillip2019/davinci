@@ -153,12 +153,12 @@ module.exports = require('./webpack.base.babel')({
     }),
 
     new BundleAnalyzerPlugin({
-      analyzerMode: 'server',
+      analyzerMode: 'static',
       analyzerHost: 'localhost',
       analyzerPort: 5000,
-      reportFilename: 'report.html',
+      reportFilename: '../report.html',
       defaultSizes: 'parsed',
-      openAnalyzer: true,
+      openAnalyzer: false,
       generateStatsFile: true,
       statsFilename: '../stats.json',
       statsOptions: null,
