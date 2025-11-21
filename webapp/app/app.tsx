@@ -18,8 +18,6 @@
  * >>
  */
 
-console.log('!!!!! DAVINCI APP.TSX LOADED - BUILD TIME:', new Date().toISOString(), '!!!!!')
-
 import 'intersection-observer'
 
 import React from 'react'

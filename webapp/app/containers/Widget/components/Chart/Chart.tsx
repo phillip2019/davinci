@@ -28,7 +28,6 @@ export class Chart extends React.PureComponent<IChartProps, IChartStates> {
   }
 
   private renderChart = (props: IChartProps) => {
-    console.log('!!!! Chart.tsx renderChart called !!!!')
     const {
       selectedChart,
       renderType,
@@ -36,8 +35,6 @@ export class Chart extends React.PureComponent<IChartProps, IChartStates> {
       isDrilling,
       onError
     } = props
-    console.log('selectedChart:', selectedChart)
-    console.log('props.metrics:', props.metrics)
 
     if (renderType === 'loading') {
       return

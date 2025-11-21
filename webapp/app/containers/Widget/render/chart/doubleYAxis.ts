@@ -238,13 +238,26 @@ export function getAixsMetrics (type, axisMetrics, data, stack, labelOption, ref
       }
     })
 
+    // 为每个 metric 创建带有 formatter 的标签配置
+    const metricLabelOption = {
+      label: {
+        normal: {
+          ...labelOption.label.normal,
+          formatter: (params) => {
+            const { value } = params
+            return getFormattedValue(value, m.format)
+          }
+        }
+      }
+    }
+
     seriesAxis.push({
       name: getAixsMetricDisplayName(m),
       type: axisPosition && axisPosition.type ? axisPosition.type : type === 'metrics' ? 'line' : 'bar',
       ...stackOption,
       yAxisIndex: type === 'metrics' ? 1 : 0,
       data: itemData,
-      ...labelOption,
+      ...metricLabelOption,
       ...(amIndex === axisMetrics.length - 1 && referenceOptions),
       itemStyle: {
         normal: {

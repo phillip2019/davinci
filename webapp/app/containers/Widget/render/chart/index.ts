@@ -36,10 +36,6 @@ import { EChartOption } from 'echarts'
 import { IChartProps } from '../../components/Chart'
 
 export default function (type, chartProps: IChartProps, drillOptions?: any): EChartOption {
-  console.log('=== CHART RENDER INDEX ===')
-  console.log('type:', type)
-  console.log('chartProps.metrics:', chartProps.metrics)
-  console.log('==========================')
   switch (type) {
     case 'line': return line(chartProps, drillOptions)
     // @ts-ignore
