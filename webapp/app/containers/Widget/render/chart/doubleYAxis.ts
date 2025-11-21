@@ -319,6 +319,11 @@ export function getDoubleYAxis (doubleYAxis) {
       fontFamily: labelFontFamily,
       fontSize: Number(labelFontSize),
       formatter: metricAxisLabelFormatter
+    },
+    nameTextStyle: {
+      color: labelColor,
+      fontFamily: labelFontFamily,
+      fontSize: Number(labelFontSize)
     }
   }
 }
