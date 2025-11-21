@@ -771,13 +771,11 @@ function getReferenceDataMetricAxis(
 }
 
 export function getAixsMetricDisplayName(m) {
-  if (m.field && m.field.alias) {
-    return m.field.alias;
+  const alias = getFieldAlias(m.field, {})
+  if (alias) {
+    return alias
   }
-  if (m.displayName) {
-    return m.displayName;
-  }
-  return decodeMetricName(m.name);
+  return m.displayName
 }
 
 function calcAggregateReferenceData(
