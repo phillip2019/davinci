@@ -774,7 +774,10 @@ export function getAixsMetricDisplayName(m) {
   if (m.field && m.field.alias) {
     return m.field.alias;
   }
-  return m.displayName
+  if (m.displayName) {
+    return m.displayName;
+  }
+  return decodeMetricName(m.name);
 }
 
 function calcAggregateReferenceData(
