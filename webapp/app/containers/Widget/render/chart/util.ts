@@ -771,7 +771,13 @@ function getReferenceDataMetricAxis(
 }
 
 export function getAixsMetricDisplayName(m) {
+  console.log('=== getAixsMetricDisplayName DEBUG ===')
+  console.log('m:', m)
+  console.log('m.field:', m.field)
+  console.log('m.displayName:', m.displayName)
   const alias = getFieldAlias(m.field, {})
+  console.log('alias from getFieldAlias:', alias)
+  console.log('======================================')
   if (alias) {
     return alias
   }
