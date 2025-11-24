@@ -1748,9 +1748,22 @@ export class OperatingPanel extends React.Component<
     this.closeReferenceConfig()
   }
 
-  private checkAllDragItem = (type: DragType) => (e: CheckboxChangeEvent) => {
+  private checkAllDragItem = (type: DragType) => (e?: CheckboxChangeEvent | React.MouseEvent) => {
     const { categoryDragItems, valueDragItems } = this.state
-    const checked = e.target.checked
+
+    // 如果是复选框事件，使用事件的 checked 值；如果是按钮点击，则切换状态
+    let checked: boolean
+    if (e && 'target' in e && 'checked' in (e.target as any)) {
+      checked = (e.target as any).checked
+    } else {
+      // 按钮点击：检查当前是否全选，如果是则取消全选，否则全选
+      if (type === 'category') {
+        checked = !(categoryDragItems.length && categoryDragItems.every((item) => item.checked))
+      } else {
+        checked = !(valueDragItems.length && valueDragItems.every((item) => item.checked))
+      }
+    }
+
     if (type === 'category') {
       this.setState({
         categoryDragItems: categoryDragItems.map((item) => ({
@@ -1806,10 +1819,16 @@ export class OperatingPanel extends React.Component<
       title: '确认清除',
       content: `确定要清除所有${dropbox.title}吗？`,
       onOk: () => {
-        dropbox.items = []
+        const newDataParams = {
+          ...dataParams,
+          [dropboxName]: {
+            ...dropbox,
+            items: []
+          }
+        }
         this.setState(
           {
-            dataParams: { ...dataParams, [dropboxName]: dropbox }
+            dataParams: newDataParams
           },
           () => {
             this.setWidgetProps()
@@ -2433,15 +2452,14 @@ export class OperatingPanel extends React.Component<
           <div className={styles.columnContainer}>
             <div className={styles.title}>
               <h4>分类型</h4>
-              {multiDrag && (
-                <Checkbox
-                  checked={
-                    categoryDragItems.length &&
-                    categoryDragItems.every((item) => item.checked)
-                  }
-                  onChange={this.checkAllDragItem('category')}
-                />
-              )}
+              <Button
+                size="small"
+                type="link"
+                onClick={this.checkAllDragItem('category')}
+                style={{ padding: '0 4px', height: 'auto' }}
+              >
+                {categoryDragItems.length && categoryDragItems.every((item) => item.checked) ? '取消全选' : '全选'}
+              </Button>
             </div>
             <ul className={`${styles.columnList} ${styles.categories}`}>
               {categoryDragItems.map((item) => {
@@ -2478,15 +2496,14 @@ export class OperatingPanel extends React.Component<
           <div className={styles.columnContainer}>
             <div className={styles.title}>
               <h4>数值型</h4>
-              {multiDrag && (
-                <Checkbox
-                  checked={
-                    valueDragItems.length &&
-                    valueDragItems.every((item) => item.checked)
-                  }
-                  onChange={this.checkAllDragItem('value')}
-                />
-              )}
+              <Button
+                size="small"
+                type="link"
+                onClick={this.checkAllDragItem('value')}
+                style={{ padding: '0 4px', height: 'auto' }}
+              >
+                {valueDragItems.length && valueDragItems.every((item) => item.checked) ? '取消全选' : '全选'}
+              </Button>
             </div>
             <ul className={`${styles.columnList} ${styles.values}`}>
               {valueDragItems.map((item) => {
