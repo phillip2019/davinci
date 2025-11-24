@@ -688,13 +688,15 @@ export class OperatingPanel extends React.Component<
     const multiDragCategoryDropboxNames = ['cols', 'rows']
     const multiDragValueDropboxNames = ['metrics', 'secondaryMetrics']
 
-    if (
-      multiDrag &&
+    // 检查是否有选中的项目用于批量拖拽
+    const hasCheckedCategoryItems = categoryDragItems.some((item) => item.checked)
+    const hasCheckedValueItems = valueDragItems.some((item) => item.checked)
+    const shouldMultiDrag =
       dropType === 'outside' &&
-      multiDragCategoryDropboxNames
-        .concat(multiDragValueDropboxNames)
-        .includes(name)
-    ) {
+      multiDragCategoryDropboxNames.concat(multiDragValueDropboxNames).includes(name) &&
+      (hasCheckedCategoryItems || hasCheckedValueItems)
+
+    if (shouldMultiDrag) {
       let selectedItems = []
       if (multiDragCategoryDropboxNames.includes(name)) {
         selectedItems = selectedItems.concat(
@@ -1791,94 +1793,6 @@ export class OperatingPanel extends React.Component<
     }
   }
 
-  private toggleSelectAll = (type: DragType) => () => {
-    const { categoryDragItems, valueDragItems } = this.state
-    if (type === 'category') {
-      const allChecked = categoryDragItems.length && categoryDragItems.every((item) => item.checked)
-      this.setState({
-        categoryDragItems: categoryDragItems.map((item) => ({
-          ...item,
-          checked: !allChecked
-        }))
-      })
-    } else {
-      const allChecked = valueDragItems.length && valueDragItems.every((item) => item.checked)
-      this.setState({
-        valueDragItems: valueDragItems.map((item) => ({
-          ...item,
-          checked: !allChecked
-        }))
-      })
-    }
-  }
-
-  private batchAddToDropbox = (dragType: DragType, dropboxName: string) => () => {
-    const { categoryDragItems, valueDragItems, dataParams } = this.state
-
-    let selectedItems: IDataParamSource[] = []
-    const destination = dataParams[dropboxName]
-    const { items } = destination
-
-    if (dragType === 'category') {
-      const checkedItems = categoryDragItems.filter((item) => item.checked)
-      if (checkedItems.length === 0) {
-        message.warning('请先选择要添加的字段')
-        return
-      }
-      selectedItems = checkedItems
-        .filter((item) => !items.find((i) => i.name === item.name))
-        .map(({ checked, ...rest }) => ({ ...rest }))
-
-      // 取消选中
-      this.setState({
-        categoryDragItems: categoryDragItems.map((item) => ({
-          ...item,
-          checked: false
-        }))
-      })
-    } else {
-      const checkedItems = valueDragItems.filter((item) => item.checked)
-      if (checkedItems.length === 0) {
-        message.warning('请先选择要添加的指标')
-        return
-      }
-      selectedItems = checkedItems
-        .filter((item) => !items.find((i) => decodeMetricName(i.name) === item.name))
-        .map(
-          ({ checked, ...rest }): IDataParamSource => ({
-            ...rest,
-            name: encodeMetricName(rest.name),
-            agg: 'sum',
-            chart: getPivot()
-          })
-        )
-
-      // 取消选中
-      this.setState({
-        valueDragItems: valueDragItems.map((item) => ({
-          ...item,
-          checked: false
-        }))
-      })
-    }
-
-    if (selectedItems.length === 0) {
-      message.info('所选字段已存在，无需重复添加')
-      return
-    }
-
-    destination.items = [...items, ...selectedItems]
-    this.setState(
-      {
-        dataParams: { ...dataParams, [dropboxName]: destination }
-      },
-      () => {
-        this.setWidgetProps()
-        message.success(`已批量添加 ${selectedItems.length} 个${dragType === 'category' ? '字段' : '指标'}`)
-      }
-    )
-  }
-
   private coustomFieldSelect = (event) => {
     const { key } = event
     switch (key) {
@@ -2496,33 +2410,6 @@ export class OperatingPanel extends React.Component<
                 />
               )}
             </div>
-            <div className={styles.batchActions}>
-              <Button
-                size="small"
-                type={categoryDragItems.some((item) => item.checked) ? 'default' : 'dashed'}
-                onClick={this.toggleSelectAll('category')}
-                style={{ marginRight: 4 }}
-              >
-                {categoryDragItems.length && categoryDragItems.every((item) => item.checked) ? '取消全选' : '全选'}
-              </Button>
-              <Button
-                size="small"
-                type="primary"
-                disabled={!categoryDragItems.some((item) => item.checked)}
-                onClick={this.batchAddToDropbox('category', 'rows')}
-                style={{ marginRight: 4 }}
-              >
-                添加到行
-              </Button>
-              <Button
-                size="small"
-                type="primary"
-                disabled={!categoryDragItems.some((item) => item.checked)}
-                onClick={this.batchAddToDropbox('category', 'cols')}
-              >
-                添加到列
-              </Button>
-            </div>
             <ul className={`${styles.columnList} ${styles.categories}`}>
               {categoryDragItems.map((item) => {
                 const { name, title, visualType, checked, ...rest } = item
@@ -2566,57 +2453,6 @@ export class OperatingPanel extends React.Component<
                   }
                   onChange={this.checkAllDragItem('value')}
                 />
-              )}
-            </div>
-            <div className={styles.batchActions}>
-              <Button
-                size="small"
-                type={valueDragItems.some((item) => item.checked) ? 'default' : 'dashed'}
-                onClick={this.toggleSelectAll('value')}
-                style={{ marginRight: 4 }}
-              >
-                {valueDragItems.length && valueDragItems.every((item) => item.checked) ? '取消全选' : '全选'}
-              </Button>
-              {mode === 'pivot' ? (
-                <>
-                  <Button
-                    size="small"
-                    type="primary"
-                    disabled={!valueDragItems.some((item) => item.checked)}
-                    onClick={this.batchAddToDropbox('value', 'metrics')}
-                    style={{ marginRight: 4 }}
-                  >
-                    添加到指标
-                  </Button>
-                  <Button
-                    size="small"
-                    type="primary"
-                    disabled={!valueDragItems.some((item) => item.checked)}
-                    onClick={this.batchAddToDropbox('value', 'cols')}
-                  >
-                    添加到列
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    size="small"
-                    type="primary"
-                    disabled={!valueDragItems.some((item) => item.checked)}
-                    onClick={this.batchAddToDropbox('value', 'metrics')}
-                    style={{ marginRight: 4 }}
-                  >
-                    添加到左轴
-                  </Button>
-                  <Button
-                    size="small"
-                    type="primary"
-                    disabled={!valueDragItems.some((item) => item.checked)}
-                    onClick={this.batchAddToDropbox('value', 'secondaryMetrics')}
-                  >
-                    添加到右轴
-                  </Button>
-                </>
               )}
             </div>
             <ul className={`${styles.columnList} ${styles.values}`}>
