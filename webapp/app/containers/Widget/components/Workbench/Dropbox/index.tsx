@@ -89,6 +89,7 @@ interface IDropboxProps {
   onItemChangeChart: (item: IDataParamSource) => (chart: IChartInfo) => void
   beforeDrop: (name: string, cachedItem: IDataParamSource, resolve: (next: boolean) => void) => void
   onDrop: (name: string, dropIndex: number, dropType: DropType, changedItems: IDataParamSource[], config?: IDataParamConfig) => void
+  onClearAll?: () => void
 }
 
 interface IDropboxStates {
@@ -290,7 +291,8 @@ export class Dropbox extends React.PureComponent<IDropboxProps, IDropboxStates> 
       onItemChangeFieldConfig,
       onItemChangeFormatConfig,
       onItemChangeChart,
-      onItemRemove
+      onItemRemove,
+      onClearAll
     } = this.props
 
     const { entering, items } = this.state
@@ -385,11 +387,22 @@ export class Dropbox extends React.PureComponent<IDropboxProps, IDropboxStates> 
         />
       )
 
+    // 批量清除按钮
+    let clearAllButton
+    if (onClearAll && items.length > 0) {
+      clearAllButton = (
+        <span className={styles.setting} onClick={onClearAll} style={{ marginLeft: 8 }}>
+          <Icon type="delete" /> 清空
+        </span>
+      )
+    }
+
     return (
       <div className={styles.dropbox}>
         <p className={styles.title}>
           {title}
           {setting}
+          {clearAllButton}
         </p>
         <div
           className={containerClass}

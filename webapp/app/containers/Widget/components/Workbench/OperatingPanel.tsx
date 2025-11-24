@@ -1793,6 +1793,33 @@ export class OperatingPanel extends React.Component<
     }
   }
 
+  private clearAllItems = (dropboxName: string) => () => {
+    const { dataParams } = this.state
+    const dropbox = dataParams[dropboxName]
+
+    if (!dropbox || !dropbox.items || dropbox.items.length === 0) {
+      message.info('没有可清除的项目')
+      return
+    }
+
+    Modal.confirm({
+      title: '确认清除',
+      content: `确定要清除所有${dropbox.title}吗？`,
+      onOk: () => {
+        dropbox.items = []
+        this.setState(
+          {
+            dataParams: { ...dataParams, [dropboxName]: dropbox }
+          },
+          () => {
+            this.setWidgetProps()
+            message.success(`已清除所有${dropbox.title}`)
+          }
+        )
+      }
+    })
+  }
+
   private coustomFieldSelect = (event) => {
     const { key } = event
     switch (key) {
@@ -1989,35 +2016,41 @@ export class OperatingPanel extends React.Component<
       if (k === 'size') {
         panelList = v.items
       }
-      return (
-        <Dropbox
-          key={k}
-          name={k}
-          title={v.title}
-          type={v.type}
-          value={v.value}
-          items={v.items}
-          mode={mode}
-          selectedChartId={chartModeSelectedChart.id}
-          dragged={dragged}
-          panelList={panelList}
-          dimetionsCount={dimetionsCount}
-          metricsCount={metricsCount}
-          onValueChange={this.dropboxValueChange(k)}
-          onItemDragStart={this.insideDragStart(k)}
-          onItemDragEnd={this.insideDragEnd}
-          onItemRemove={this.removeDropboxItem(k)}
-          onItemSort={this.getDropboxItemSortDirection(k)}
-          onItemChangeAgg={this.getDropboxItemAggregator(k)}
-          onItemChangeFieldConfig={this.dropboxItemChangeFieldConfig(k)}
-          onItemChangeFormatConfig={this.dropboxItemChangeFormatConfig(k)}
-          onItemChangeColorConfig={this.dropboxItemChangeColorConfig}
-          onItemChangeFilterConfig={this.dropboxItemChangeFilterConfig}
-          onItemChangeChart={this.getDropboxItemChart}
-          beforeDrop={this.beforeDrop}
-          onDrop={this.drop}
-        />
-      )
+
+      // 为指标框添加批量清除功能
+      const dropboxProps: any = {
+        key: k,
+        name: k,
+        title: v.title,
+        type: v.type,
+        value: v.value,
+        items: v.items,
+        mode: mode,
+        selectedChartId: chartModeSelectedChart.id,
+        dragged: dragged,
+        panelList: panelList,
+        dimetionsCount: dimetionsCount,
+        metricsCount: metricsCount,
+        onValueChange: this.dropboxValueChange(k),
+        onItemDragStart: this.insideDragStart(k),
+        onItemDragEnd: this.insideDragEnd,
+        onItemRemove: this.removeDropboxItem(k),
+        onItemSort: this.getDropboxItemSortDirection(k),
+        onItemChangeAgg: this.getDropboxItemAggregator(k),
+        onItemChangeFieldConfig: this.dropboxItemChangeFieldConfig(k),
+        onItemChangeFormatConfig: this.dropboxItemChangeFormatConfig(k),
+        onItemChangeColorConfig: this.dropboxItemChangeColorConfig,
+        onItemChangeFilterConfig: this.dropboxItemChangeFilterConfig,
+        onItemChangeChart: this.getDropboxItemChart,
+        beforeDrop: this.beforeDrop,
+        onDrop: this.drop
+      }
+
+      if (k === 'metrics') {
+        dropboxProps.onClearAll = this.clearAllItems(k)
+      }
+
+      return <Dropbox {...dropboxProps} />
     })
 
     const rowsColsToggleClass = classnames({
