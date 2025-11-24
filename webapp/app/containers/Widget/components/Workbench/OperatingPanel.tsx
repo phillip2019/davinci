@@ -2577,23 +2577,47 @@ export class OperatingPanel extends React.Component<
               >
                 {valueDragItems.length && valueDragItems.every((item) => item.checked) ? '取消全选' : '全选'}
               </Button>
-              <Button
-                size="small"
-                type="primary"
-                disabled={!valueDragItems.some((item) => item.checked)}
-                onClick={this.batchAddToDropbox('value', 'metrics')}
-                style={{ marginRight: 4 }}
-              >
-                添加到左轴
-              </Button>
-              <Button
-                size="small"
-                type="primary"
-                disabled={!valueDragItems.some((item) => item.checked)}
-                onClick={this.batchAddToDropbox('value', 'secondaryMetrics')}
-              >
-                添加到右轴
-              </Button>
+              {mode === 'pivot' ? (
+                <>
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!valueDragItems.some((item) => item.checked)}
+                    onClick={this.batchAddToDropbox('value', 'metrics')}
+                    style={{ marginRight: 4 }}
+                  >
+                    添加到指标
+                  </Button>
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!valueDragItems.some((item) => item.checked)}
+                    onClick={this.batchAddToDropbox('value', 'cols')}
+                  >
+                    添加到列
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!valueDragItems.some((item) => item.checked)}
+                    onClick={this.batchAddToDropbox('value', 'metrics')}
+                    style={{ marginRight: 4 }}
+                  >
+                    添加到左轴
+                  </Button>
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!valueDragItems.some((item) => item.checked)}
+                    onClick={this.batchAddToDropbox('value', 'secondaryMetrics')}
+                  >
+                    添加到右轴
+                  </Button>
+                </>
+              )}
             </div>
             <ul className={`${styles.columnList} ${styles.values}`}>
               {valueDragItems.map((item) => {
