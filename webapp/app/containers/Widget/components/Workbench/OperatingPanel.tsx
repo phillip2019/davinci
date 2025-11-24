@@ -1807,7 +1807,7 @@ export class OperatingPanel extends React.Component<
   }
 
   private clearAllItems = (dropboxName: string) => () => {
-    const { dataParams } = this.state
+    const { dataParams, styleParams } = this.state
     const dropbox = dataParams[dropboxName]
 
     if (!dropbox || !dropbox.items || dropbox.items.length === 0) {
@@ -1831,7 +1831,7 @@ export class OperatingPanel extends React.Component<
             dataParams: newDataParams
           },
           () => {
-            this.setWidgetProps()
+            this.setWidgetProps(newDataParams, styleParams)
             message.success(`已清除所有${dropbox.title}`)
           }
         )
