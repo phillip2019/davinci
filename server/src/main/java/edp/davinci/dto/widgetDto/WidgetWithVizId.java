@@ -25,4 +25,5 @@ import lombok.Data;
 public class WidgetWithVizId extends Widget {
     private Long vizId;
     private int vizIndex;
+    private Long relationId;
 }

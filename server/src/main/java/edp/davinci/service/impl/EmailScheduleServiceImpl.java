@@ -112,7 +112,7 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
         try {
             cronJobConfig = JSONObject.parseObject(cronJob.getConfig(), CronJobConfig.class);
         } catch (Exception e) {
-        	scheduleLogger.error("Cronjob({}) parse config({}) error:{}", jobId, cronJob.getConfig(), e.getMessage());
+            scheduleLogger.error("Cronjob({}) parse config({}) error:{}", jobId, cronJob.getConfig(), e.getMessage());
             return;
         }
 
@@ -133,7 +133,7 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
         }
 
         if (cronJobConfig.getType().equals(CronJobMediaType.EXCEL.getType())) {
-			excels = generateExcels(jobId, cronJobConfig, creator);
+            excels = generateExcels(jobId, cronJobConfig, creator);
         }
 
         if (cronJobConfig.getType().equals(CronJobMediaType.IMAGEANDEXCEL.getType())) {
@@ -144,7 +144,8 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
         List<MailAttachment> attachmentList = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(excels)) {
-            excels.forEach(excel -> attachmentList.add(new MailAttachment(excel.getName() + FileTypeEnum.XLSX.getFormat(), excel.getFile())));
+            excels.forEach(excel -> attachmentList
+                    .add(new MailAttachment(excel.getName() + FileTypeEnum.XLSX.getFormat(), excel.getFile())));
         }
 
         if (!CollectionUtils.isEmpty(images)) {
@@ -219,14 +220,15 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                     boolean isMaintainer = projectService.isMaintainer(projectDetail, user);
                     Map<Long, Integer> slidePageMap = displayPageMap.get(cronJobContent.getId());
 
-                    Map<Long, List<WidgetWithVizId>> slideWidgetsMap = widgetsWithSlideIdList.stream().collect(Collectors.groupingBy(WidgetWithVizId::getVizId));
+                    Map<Long, List<WidgetWithVizId>> slideWidgetsMap = widgetsWithSlideIdList.stream()
+                            .collect(Collectors.groupingBy(WidgetWithVizId::getVizId));
                     int slidePageSize = slideWidgetsMap.size();
                     List<Long> slideIds = new ArrayList<>();
                     if (CollectionUtils.isEmpty(cronJobContent.getItems())) {
-                        //all of slides in display
+                        // all of slides in display
                         slideIds.addAll(slideWidgetsMap.keySet());
                     } else {
-                        //checked slides in display
+                        // checked slides in display
                         slideIds = cronJobContent.getItems();
                     }
                     for (Long slideId : slideIds) {
@@ -236,7 +238,8 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                         }
                         List<WidgetContext> widgetContexts = new ArrayList<>();
                         widgets.forEach(widget -> {
-                            ViewExecuteParam viewExecuteParam = getViewExecuteParam(null, widget.getConfig(), null);
+                            ViewExecuteParam viewExecuteParam = getViewExecuteParam(display.getConfig(),
+                                    widget.getConfig(), widget.getRelationId());
                             widgetContexts.add(new WidgetContext(widget, isMaintainer, viewExecuteParam));
                         });
 
@@ -249,7 +252,8 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                                 .build();
 
                         int page = slidePageMap.get(slideId);
-                        String workBookName = slidePageSize == 1 ? display.getName() : display.getName() + "(" + page + ")";
+                        String workBookName = slidePageSize == 1 ? display.getName()
+                                : display.getName() + "(" + page + ")";
                         workBookContextMap.put(workBookName, workBookContext);
                         excelEntityOrderMap.put(workBookName, order + page);
                     }
@@ -258,10 +262,13 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                 if (vizOrderMap.containsKey(DASHBOARD + AT_SYMBOL + cronJobContent.getId())) {
                     order = vizOrderMap.get(DASHBOARD + AT_SYMBOL + cronJobContent.getId());
                 }
-                DashboardWithPortal dashboard = dashboardMapper.getDashboardWithPortalAndProject(cronJobContent.getId());
-                excelEntityOrderMap.put(dashboard.getName(), vizOrderMap.get(DASHBOARD + AT_SYMBOL + cronJobContent.getId()));
+                DashboardWithPortal dashboard = dashboardMapper
+                        .getDashboardWithPortalAndProject(cronJobContent.getId());
+                excelEntityOrderMap.put(dashboard.getName(),
+                        vizOrderMap.get(DASHBOARD + AT_SYMBOL + cronJobContent.getId()));
 
-                ProjectDetail projectDetail = projectService.getProjectDetail(dashboard.getProject().getId(), user, false);
+                ProjectDetail projectDetail = projectService.getProjectDetail(dashboard.getProject().getId(), user,
+                        false);
                 boolean isMaintainer = projectService.isMaintainer(projectDetail, user);
 
                 List<WidgetWithRelationDashboardId> widgets = widgetMapper.getByDashboard(cronJobContent.getId());
@@ -270,7 +277,8 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                     widgets.forEach(w -> {
                         Widget widget = new Widget();
                         BeanUtils.copyProperties(w, widget);
-                        ViewExecuteParam viewExecuteParam = getViewExecuteParam(dashboard.getConfig(), widget.getConfig(), w.getRelationId());
+                        ViewExecuteParam viewExecuteParam = getViewExecuteParam(dashboard.getConfig(),
+                                widget.getConfig(), w.getRelationId());
                         widgetContexts.add(new WidgetContext(widget, isMaintainer, viewExecuteParam));
                     });
 
@@ -288,7 +296,6 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
             }
         }
 
-
         if (CollectionUtils.isEmpty(workBookContextMap)) {
             scheduleLogger.warn("CronJob({}) workbook context is empty", jobId);
             return null;
@@ -299,17 +306,18 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
         int contextSize = workBookContextMap.size();
         final AtomicInteger index = new AtomicInteger(1);
         workBookContextMap.forEach((name, context) -> {
-            scheduleLogger.info("CronJob({}) submit workbook task:{}, thread:{}, total:{}", jobId, name, index, contextSize);
+            scheduleLogger.info("CronJob({}) submit workbook task:{}, thread:{}, total:{}", jobId, name, index,
+                    contextSize);
             try {
-            	String uuid = UUID.randomUUID().toString().replace("-", EMPTY);
+                String uuid = UUID.randomUUID().toString().replace("-", EMPTY);
                 context.setWrapper(new MsgWrapper(new MsgMailExcel(jobId), ActionEnum.MAIL, uuid));
                 excelPathFutureMap.put(name, ExecutorUtil.submitWorkbookTask(context, scheduleLogger));
-            }catch (Exception e) {
-            	scheduleLogger.error("Cronjob({}) submit workbook task error, thread:{}", jobId, index.get());
-            	scheduleLogger.error(e.getMessage(), e);
-			}finally {
+            } catch (Exception e) {
+                scheduleLogger.error("Cronjob({}) submit workbook task error, thread:{}", jobId, index.get());
+                scheduleLogger.error(e.getMessage(), e);
+            } finally {
                 index.incrementAndGet();
-			}
+            }
         });
 
         excelPathFutureMap.forEach((name, future) -> {
@@ -318,8 +326,8 @@ public class EmailScheduleServiceImpl extends BaseScheduleService implements Sch
                 excelPath = future.get(1, TimeUnit.HOURS);
                 scheduleLogger.info("CronJob({}) workbook task:{} finish", jobId, name);
             } catch (Exception e) {
-            	scheduleLogger.info("CronJob({}) workbook task:{} error", jobId, name);
-            	scheduleLogger.error(e.getMessage(), e);
+                scheduleLogger.info("CronJob({}) workbook task:{} error", jobId, name);
+                scheduleLogger.error(e.getMessage(), e);
             }
             if (!StringUtils.isEmpty(excelPath)) {
                 excelContents.add(new ExcelContent(excelEntityOrderMap.get(name), name, excelPath));
