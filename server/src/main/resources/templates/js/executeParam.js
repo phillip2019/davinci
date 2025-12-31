@@ -5185,12 +5185,40 @@ function getModelValue(control, field, value) {
 }
 
 
+
 function deserializeDefaultValue(filter) {
     var type = filter.type,
         multiple = filter.multiple,
         dynamicDefaultValue = filter.dynamicDefaultValue,
+        defaultValueType = filter.defaultValueType,
         defaultValue = filter.defaultValue;
     var moment = global.moment
+
+    var parseRelativeDate = function (rd) {
+        if (!rd || typeof rd !== 'object') return null
+        var m = moment()
+        var type = rd.type
+        var valueType = rd.valueType
+        var value = rd.value
+        if (valueType === 'prev') {
+            return m.subtract(value, type + 's')
+        } else if (valueType === 'next') {
+            return m.add(value, type + 's')
+        } else if (valueType === 'current') {
+            return m.startOf(type)
+        }
+        return m
+    }
+
+    if (defaultValueType === 'dynamic' && defaultValue) {
+        if (Array.isArray(defaultValue)) {
+            return defaultValue.map(function (rd) { return parseRelativeDate(rd) })
+        } else if (typeof defaultValue === 'object') {
+            return parseRelativeDate(defaultValue)
+        }
+        dynamicDefaultValue = defaultValue
+    }
+
     switch (type) {
         case FilterTypes.Date:
             if (dynamicDefaultValue) {
@@ -5212,7 +5240,7 @@ function deserializeDefaultValue(filter) {
                     case DatePickerDefaultValues.LastMonth:
                         return moment().subtract(30, 'days').startOf('month');
                     case DatePickerDefaultValues.Quarter:
-                        return moment().startOf('month');
+                        return moment().startOf('quarter');
                     case DatePickerDefaultValues.Day90:
                         return moment().subtract(90, 'days');
                     case DatePickerDefaultValues.LastQuarter:
@@ -5222,17 +5250,55 @@ function deserializeDefaultValue(filter) {
                     case DatePickerDefaultValues.Day365:
                         return moment().subtract(365, 'days');
                     case DatePickerDefaultValues.LastYear:
-                        return moment().subtract(90, 'days').startOf('year');
+                        return moment().subtract(1, 'years').startOf('year');
                     default:
                         return multiple ? defaultValue : defaultValue && moment(defaultValue);
                 }
             } else {
-                return null;
+                return multiple ? defaultValue : defaultValue && moment(defaultValue);
+            }
+        case FilterTypes.DateRange:
+            if (dynamicDefaultValue) {
+                switch (dynamicDefaultValue) {
+                    case DatePickerDefaultValues.Today:
+                        return [moment(), moment()]
+                    case DatePickerDefaultValues.Yesterday:
+                        return [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+                    case DatePickerDefaultValues.Week:
+                        return [moment().startOf('week'), moment()]
+                    case DatePickerDefaultValues.Day7:
+                        return [moment().subtract(7, 'days'), moment()]
+                    case DatePickerDefaultValues.LastWeek:
+                        return [moment().subtract(7, 'days').startOf('week'), moment().subtract(7, 'days').endOf('week')]
+                    case DatePickerDefaultValues.Month:
+                        return [moment().startOf('month'), moment()]
+                    case DatePickerDefaultValues.Day30:
+                        return [moment().subtract(30, 'days'), moment()]
+                    case DatePickerDefaultValues.LastMonth:
+                        return [moment().subtract(1, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')]
+                    case DatePickerDefaultValues.Quarter:
+                        return [moment().startOf('quarter'), moment()]
+                    case DatePickerDefaultValues.Day90:
+                        return [moment().subtract(90, 'days'), moment()]
+                    case DatePickerDefaultValues.LastQuarter:
+                        return [moment().subtract(1, 'quarters').startOf('quarter'), moment().subtract(1, 'quarters').endOf('quarter')]
+                    case DatePickerDefaultValues.Year:
+                        return [moment().startOf('year'), moment()]
+                    case DatePickerDefaultValues.Day365:
+                        return [moment().subtract(365, 'days'), moment()]
+                    case DatePickerDefaultValues.LastYear:
+                        return [moment().subtract(1, 'years').startOf('year'), moment().subtract(1, 'years').endOf('year')]
+                    default:
+                        return defaultValue
+                }
+            } else {
+                return defaultValue
             }
         default:
             return defaultValue;
     }
 }
+
 
 // #endregion
 
